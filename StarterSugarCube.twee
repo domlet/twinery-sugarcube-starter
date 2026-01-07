@@ -1,0 +1,191 @@
+:: StoryTitle
+SugarCube Starter (Stats + Inventory + Audio)
+
+:: StoryInit
+/* Runs once at the beginning */
+<<set $health = 10>>
+<<set $score = 0>>
+<<set $inventory = []>>
+<<set $musicOn = false>>
+
+/* Preload audio file (optional but recommended)
+   Put your audio at: sounds/514942__shortrecord__horror-ambient-factory.mp3 */
+<<cacheaudio "bgm" "sounds/514942__shortrecord__horror-ambient-factory.mp3">>
+
+:: StoryCaption
+/* Persistent HUD (always visible) */
+''Health:'' $health  |  ''Score:'' $score  |  ''Items:'' $inventory.length
+<br>
+
+<<link "🎒 Inventory">>
+  <<goto "Inventory">>
+<</link>>
+ |
+<<link "❤️ Stats">>
+  <<goto "Stats">>
+<</link>>
+ |
+<<link "🔊 Music">>
+  <<goto "Audio">>
+<</link>>
+
+<hr>
+
+:: Start
+Welcome! This starter story has:
+- **Stats** ($health, $score)
+- **Inventory** ($inventory array)
+- **Audio toggle** (manual start required by browsers)
+- A simple **HUD** at the top
+
+You are in a small room. There’s a **shiny key** on a table and a door to the hallway.
+
+<<if !$inventory.includes("Key")>>
+<<link "Pick up the key">>
+  <<set $inventory.push("Key")>>
+  <<set $score += 5>>
+  You picked up the Key. (+5 score)
+<</link>>
+<<else>>
+You already grabbed the Key.
+<</if>>
+
+<br><br>
+
+[[Open the door->DoorCheck]]
+<br>
+[[Step outside into the forest->Forest]]
+
+:: DoorCheck
+You try the door.
+
+<<if $inventory.includes("Key")>>
+The key fits! You unlock it.
+<<set $score += 10>>
+[[Enter the hallway->Hallway]]
+<<else>>
+It’s locked. You need a key.
+[[Go back->Start]]
+<</if>>
+
+:: Hallway
+A hallway stretches ahead. A trap plate is visible on the floor.
+
+<<link "Carefully step over the trap plate">>
+  <<set $score += 15>>
+  Nice move. (+15 score)
+  [[Continue->TreasureRoom]]
+<</link>>
+
+<br>
+
+<<link "Sprint past it (risky)">>
+  <<set $health -= 3>>
+  Ouch—you got clipped. (-3 health)
+  <<if $health <= 0>>
+    [[...->GameOver]]
+  <<else>>
+    [[Stumble forward->TreasureRoom]]
+  <</if>>
+<</link>>
+
+<br><br>
+[[Back to start->Start]]
+
+:: TreasureRoom
+You find a small treasure room with a glowing coin.
+
+<<if !$inventory.includes("GlowCoin")>>
+<<link "Take the glowing coin">>
+  <<set $inventory.push("GlowCoin")>>
+  <<set $score += 50>>
+  You got the GlowCoin! (+50 score)
+<</link>>
+<<else>>
+The treasure chest is empty now.
+<</if>>
+
+<br><br>
+[[Return to hallway->Hallway]]
+<br>
+[[Return to start->Start]]
+
+:: Forest
+You step into a forest. It’s calm… maybe too calm.
+
+<<link "Rest for a moment">>
+  <<set $health += 2>>
+  You feel a bit better. (+2 health)
+<</link>>
+
+<br>
+
+<<link "Explore deeper">>
+  <<set $score += 20>>
+  You discover a new path. (+20 score)
+<</link>>
+
+<br><br>
+[[Go back inside->Start]]
+
+:: Inventory
+== Inventory ==
+<<if $inventory.length === 0>>
+You aren’t carrying anything.
+<<else>>
+<<for _item range $inventory>>
+• _item<br>
+<</for>>
+<</if>>
+
+<br>
+[[Back->Start]]
+
+:: Stats
+== Stats ==
+Health: $health<br>
+Score: $score<br>
+
+<br>
+<<if $health <= 0>>
+[[Go to Game Over->GameOver]]
+<</if>>
+
+[[Back->Start]]
+
+:: Audio
+== Music Toggle ==
+Browsers usually require a click before audio will play.
+
+<<if !$musicOn>>
+<<link "🔊 Turn Music ON">>
+  <<audio "bgm" loop play>>
+  <<set $musicOn = true>>
+  Music is ON.
+<</link>>
+<<else>>
+<<link "🔇 Turn Music OFF">>
+  <<audio "bgm" stop>>
+  <<set $musicOn = false>>
+  Music is OFF.
+<</link>>
+<</if>>
+
+<br><br>
+''Audio file path used:'' sounds/514942__shortrecord__horror-ambient-factory.mp3
+<br>
+(You can change this in StoryInit.)
+
+<br><br>
+[[Back->Start]]
+
+:: GameOver
+== Game Over ==
+Your health hit 0.
+
+Final Score: $score
+
+<br>
+<<link "Restart">>
+  <<restart>>
+<</link>>
